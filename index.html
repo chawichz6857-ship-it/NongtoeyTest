@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>แบบทดสอบวิชาวิทยาศาสตร์เพื่ออาชีพธุรกิจและบริการ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --maroon:#7a1f3d;
+    --maroon-dark:#5a1530;
+    --maroon-light:#9c2c52;
+    --green-ok:#2e7d4f;
+    --red-bad:#c0392b;
+    --bg:#f4efe9;
+    --card:#ffffff;
+    --border:#e4dcd3;
+    --text:#33282b;
+    --muted:#8a7a80;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Kanit',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    padding:24px 12px 60px;
+  }
+  .wrap{width:100%;max-width:760px;}
+  header{
+    text-align:center;
+    margin-bottom:24px;
+  }
+  header h1{
+    font-size:1.5rem;
+    font-weight:600;
+    color:var(--maroon-dark);
+    margin:0 0 4px;
+  }
+  header p{
+    margin:0;
+    color:var(--muted);
+    font-size:0.95rem;
+  }
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:24px;
+    box-shadow:0 4px 18px rgba(122,31,61,0.06);
+    margin-bottom:20px;
+  }
+  .screen{display:none;}
+  .screen.active{display:block;}
+
+  /* --- Chapter select --- */
+  .chapter-list{display:flex;flex-direction:column;gap:12px;margin:20px 0;}
+  .chapter-option{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    border:2px solid var(--border);
+    border-radius:12px;
+    padding:14px 16px;
+    cursor:pointer;
+    transition:border-color .15s, background .15s;
+  }
+  .chapter-option:hover{border-color:var(--maroon-light);}
+  .chapter-option.checked{
+    border-color:var(--maroon);
+    background:#fbf1f4;
+  }
+  .chapter-option input{
+    width:20px;height:20px;accent-color:var(--maroon);flex-shrink:0;
+  }
+  .chapter-option .info b{display:block;font-size:1rem;color:var(--maroon-dark);}
+  .chapter-option .info span{font-size:0.85rem;color:var(--muted);}
+
+  .select-actions{display:flex;justify-content:space-between;gap:10px;margin-bottom:6px;flex-wrap:wrap;}
+  .link-btn{
+    background:none;border:none;color:var(--maroon);
+    font-family:'Kanit',sans-serif;font-size:0.85rem;cursor:pointer;
+    text-decoration:underline;padding:4px 0;
+  }
+
+  button.primary{
+    display:block;width:100%;
+    background:var(--maroon);
+    color:#fff;border:none;border-radius:12px;
+    padding:14px;font-size:1.05rem;font-weight:500;
+    font-family:'Kanit',sans-serif;
+    cursor:pointer;transition:background .15s;
+    margin-top:8px;
+  }
+  button.primary:hover{background:var(--maroon-dark);}
+  button.primary:disabled{background:#c9b9c0;cursor:not-allowed;}
+
+  button.secondary{
+    display:block;width:100%;
+    background:#fff;
+    color:var(--maroon);border:2px solid var(--maroon);border-radius:12px;
+    padding:12px;font-size:1rem;font-weight:500;
+    font-family:'Kanit',sans-serif;
+    cursor:pointer;transition:all .15s;
+    margin-top:10px;
+  }
+  button.secondary:hover{background:#fbf1f4;}
+
+  /* --- Quiz screen --- */
+  .quiz-topbar{
+    display:flex;justify-content:space-between;align-items:center;
+    margin-bottom:14px;font-size:0.9rem;color:var(--muted);
+  }
+  .progress-bar{
+    height:8px;background:var(--border);border-radius:6px;overflow:hidden;margin-bottom:20px;
+  }
+  .progress-fill{
+    height:100%;background:var(--maroon);width:0%;transition:width .2s;
+  }
+  .q-block{
+    border-bottom:1px solid var(--border);
+    padding-bottom:22px;margin-bottom:22px;
+  }
+  .q-block:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+  .q-tag{
+    display:inline-block;background:#fbf1f4;color:var(--maroon);
+    font-size:0.75rem;font-weight:500;padding:2px 10px;border-radius:999px;
+    margin-bottom:8px;
+  }
+  .q-text{font-size:1.02rem;font-weight:500;margin:0 0 14px;line-height:1.5;}
+  .choice{
+    display:flex;align-items:flex-start;gap:10px;
+    border:1.5px solid var(--border);border-radius:10px;
+    padding:11px 14px;margin-bottom:9px;cursor:pointer;
+    transition:border-color .15s, background .15s;
+  }
+  .choice:hover{border-color:var(--maroon-light);}
+  .choice.selected{border-color:var(--maroon);background:#fbf1f4;}
+  .choice input{margin-top:3px;accent-color:var(--maroon);flex-shrink:0;}
+  .choice label{cursor:pointer;line-height:1.45;}
+
+  /* --- Result screen --- */
+  .score-hero{
+    text-align:center;padding:20px 10px 26px;
+  }
+  .score-circle{
+    width:140px;height:140px;border-radius:50%;
+    border:8px solid var(--maroon);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    margin:0 auto 16px;
+  }
+  .score-circle b{font-size:2rem;color:var(--maroon-dark);line-height:1;}
+  .score-circle span{font-size:0.8rem;color:var(--muted);margin-top:4px;}
+  .score-msg{font-size:1.1rem;font-weight:500;color:var(--maroon-dark);}
+
+  .review-item{
+    border:1.5px solid var(--border);border-radius:12px;
+    padding:14px 16px;margin-bottom:12px;
+  }
+  .review-item.correct{border-color:var(--green-ok);background:#f2f9f4;}
+  .review-item.wrong{border-color:var(--red-bad);background:#fdf2f1;}
+  .review-head{
+    display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:0.8rem;font-weight:500;
+  }
+  .badge{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:22px;height:22px;border-radius:50%;color:#fff;font-size:0.8rem;flex-shrink:0;
+  }
+  .badge.ok{background:var(--green-ok);}
+  .badge.no{background:var(--red-bad);}
+  .review-q{font-weight:500;margin:0 0 10px;line-height:1.5;}
+  .review-line{font-size:0.92rem;margin:3px 0;line-height:1.5;}
+  .review-line b{font-weight:600;}
+  .your-ans.wrong-text{color:var(--red-bad);}
+  .your-ans.ok-text{color:var(--green-ok);}
+  .correct-ans{color:var(--green-ok);}
+
+  .filter-tabs{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
+  .filter-tab{
+    border:1.5px solid var(--border);background:#fff;color:var(--muted);
+    border-radius:999px;padding:6px 16px;font-size:0.85rem;
+    cursor:pointer;font-family:'Kanit',sans-serif;
+  }
+  .filter-tab.active{background:var(--maroon);border-color:var(--maroon);color:#fff;}
+
+  .empty-note{
+    text-align:center;color:var(--muted);padding:20px;font-size:0.95rem;
+  }
+  .warn{
+    color:var(--red-bad);font-size:0.85rem;text-align:center;margin-top:6px;min-height:18px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>วิทยาศาสตร์เพื่ออาชีพธุรกิจและบริการ</h1>
+    <p>แบบทดสอบท้ายบท — เลือกบทที่ต้องการทดสอบ</p>
+  </header>
+
+  <!-- SCREEN 1: เลือกบท -->
+  <div id="screen-select" class="screen active">
+    <div class="card">
+      <div class="select-actions">
+        <button class="link-btn" onclick="selectAll(true)">เลือกทั้งหมด</button>
+        <button class="link-btn" onclick="selectAll(false)">ยกเลิกทั้งหมด</button>
+      </div>
+      <div class="chapter-list" id="chapter-list"></div>
+      <button class="primary" id="start-btn" onclick="startQuiz()">เริ่มทำแบบทดสอบ</button>
+      <div class="warn" id="select-warn"></div>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: ทำแบบทดสอบ -->
+  <div id="screen-quiz" class="screen">
+    <div class="card">
+      <div class="quiz-topbar">
+        <span id="quiz-title-label">แบบทดสอบ</span>
+        <span id="answered-count">ตอบแล้ว 0/0</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+      <div id="quiz-questions"></div>
+      <button class="primary" id="submit-btn" onclick="submitQuiz()">ส่งคำตอบและตรวจ</button>
+      <div class="warn" id="submit-warn"></div>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: ผลลัพธ์ -->
+  <div id="screen-result" class="screen">
+    <div class="card score-hero">
+      <div class="score-circle">
+        <b id="score-number">0/0</b>
+        <span>คะแนนที่ได้</span>
+      </div>
+      <div class="score-msg" id="score-msg"></div>
+    </div>
+
+    <div class="card">
+      <div class="filter-tabs">
+        <button class="filter-tab active" data-f="all" onclick="setFilter('all')">ทั้งหมด</button>
+        <button class="filter-tab" data-f="wrong" onclick="setFilter('wrong')">ตอบผิด</button>
+        <button class="filter-tab" data-f="correct" onclick="setFilter('correct')">ตอบถูก</button>
+      </div>
+      <div id="review-list"></div>
+      <div class="empty-note" id="review-empty" style="display:none;">ไม่มีข้อในหมวดนี้ 🎉</div>
+    </div>
+
+    <button class="primary" onclick="retrySameChapters()">ทำแบบทดสอบชุดนี้อีกครั้ง</button>
+    <button class="secondary" onclick="backToSelect()">เลือกบทใหม่</button>
+  </div>
+</div>
+
+<script>
+/* ================= ข้อมูลคำถามแต่ละบท ================= */
+const CHAPTERS = [
+  {
+    id: 1,
+    name: "บทที่ 1",
+    topic: "ความหลากหลายทางชีวภาพ",
+    questions: [
+      {q:"ข้อใด ไม่จัด เป็นความหลากหลายทางชีวภาพ", choices:[
+        "สวนป่าในชุมชนมีพืช 35 ชนิด สัตว์ปีก 15 ชนิด สัตว์เลื้อยคลาน 8 ชนิด",
+        "ค่างแว่น เป็นสัตว์ที่มีอยู่จำนวนมากที่เขาสามร้อยยอด จังหวัดประจวบคีรีขันธ์",
+        "ป่าไม้ในประเทศไทยมีทั้งป่าดิบชื้น ป่าดิบเขา ป่าพรุ ป่าเต็งรัง ป่าเบญจพรรณ",
+        "หมอนทอง ก้านยาว ชะนี เป็นพันธุ์ทุเรียนที่ปลูกในประเทศไทย"], answer:1},
+      {q:"ข้อใดเป็นความหลากหลายทางชนิดพันธุ์", choices:[
+        "ในป่าชายเลนจะพบ ปูแสม ปลาตีน ปูดำ",
+        "ในตู้เลี้ยงปลามีปลาหางนกยูง ตัวผู้ 10 ตัว ตัวเมีย 20 ตัว",
+        "ในนาข้าว 20 ไร่ มีข้าวพันธุ์ กข.1 เต็มพื้นที่",
+        "ในบ่อเลี้ยงกบมีกบ 50 ตัว"], answer:0},
+      {q:"ข้อใดเป็นความหลากหลายทางพันธุกรรม", choices:[
+        "ในป่าดิบชื้นมีพืชขึ้นหนาแน่น",
+        "ข้าวเจ้าในประเทศไทยมีหลายสายพันธุ์",
+        "ระบบนิเวศในหนองน้ำข้างบ้านมีปลากระดี่จำนวนมากที่สุด",
+        "เฟิร์นเป็นพืชที่พบได้มากในระบบนิเวศป่าดิบชื้น"], answer:1},
+      {q:"แมวเปอร์เซีย แมวโคราช แมวขาวมณี จัดเป็นความหลากหลายทางชีวภาพระดับใด", choices:[
+        "ความหลากหลายของระบบนิเวศ",
+        "ความหลากหลายของเชื้อชาติ",
+        "ความหลากหลายของชนิดพันธุ์",
+        "ความหลากหลายทางพันธุกรรม"], answer:3},
+      {q:"พืชที่จัดว่าเป็นพืชเด่นที่ไม่ผลัดใบที่พบในป่าดิบชื้นทางภาคใต้คือพืชชนิดใด", choices:["ไผ่","หวาย","ตะเคียน","สัก"], answer:2},
+      {q:"ป่าไม้ในข้อใดจัดเป็นป่าไม้ผลัดใบ", choices:["ป่าดิบเขา","ป่าพรุ","ป่าเบญจพรรณ","ป่าดิบชื้น"], answer:2},
+      {q:"ข้อใด ไม่ใช่ การปรับตัวของสิ่งมีชีวิตเพื่ออาศัยอยู่ในเขตน้ำไหลเชี่ยว", choices:[
+        "มีโครงสร้างพิเศษสำหรับเกาะหรือดูดพื้นผิว",
+        "สร้างเมือกสำหรับยึดเกาะ",
+        "ปรับตัวให้รูปร่างเพรียวขึ้น",
+        "ปรับสีผิวให้กลมกลืนกับพื้น"], answer:3},
+      {q:"ปัจจุบันสัตว์ป่าสงวนในประเทศไทยมีกี่ชนิด", choices:["15 ชนิด","18 ชนิด","20 ชนิด","22 ชนิด"], answer:2},
+      {q:"นกที่พบในป่าชายเลนมีหลายชนิด ยกเว้น นกชนิดใด", choices:["นกยางเปีย","เหยี่ยวแดง","นกแต้วแล้ว","นกกาน้ำ"], answer:3},
+      {q:"สิ่งมีชีวิตในระบบนิเวศแหล่งน้ำเค็มที่จัดเป็นกลุ่มเนกตอน คือสิ่งมีชีวิตในข้อใด", choices:[
+        "สิ่งมีชีวิตที่ว่ายน้ำด้วยตนเองหากินในทะเล",
+        "สิ่งมีชีวิตขนาดเล็กที่ล่องลอยในกระแสน้ำ",
+        "สิ่งมีชีวิตที่ดำรงชีวิตตามพื้นทะเล",
+        "สิ่งมีชีวิตขนาดใหญ่ที่กินทั้งพืชและสัตว์เป็นอาหาร"], answer:0},
+      {q:"สิ่งมีชีวิตในข้อใดจัดเป็นกลุ่มเบนทอส", choices:[
+        "ปลาฉลาม พยูน",
+        "ปะการัง ดาวทะเล หอย",
+        "แพลงก์ตอนพืช แพลงก์ตอนสัตว์",
+        "ปูก้ามดาบ ฟองน้ำ เต่า"], answer:3},
+      {q:"การจำแนกสิ่งมีชีวิตออกเป็นหมวดหมู่จากใหญ่ไปเล็ก สิ่งมีชีวิตในหมวดหมู่ใดที่เล็กที่สุด", choices:["คลาส","สปีชีส์","สกุล","ไฟลัม"], answer:1},
+      {q:"สิ่งมีชีวิตในอาณาจักรมอเนอรามีลักษณะเด่นที่สำคัญอย่างไร", choices:[
+        "เซลล์เดียว มีเยื่อหุ้มนิวเคลียส",
+        "เซลล์เดียว ไม่มีเยื่อหุ้มนิวเคลียส",
+        "ไม่มีคลอโรฟิลล์ สืบพันธุ์โดยการสร้างสปอร์",
+        "มีคลอโรฟิลล์ สร้างอาหารเองได้"], answer:1},
+      {q:"เห็ด รา ยีสต์ จัดเป็นสิ่งมีชีวิตอยู่ในกลุ่มใด", choices:["อาณาจักรโพรติสตา","อาณาจักรพืช","อาณาจักรฟังไจ","อาณาจักรมอเนอรา"], answer:2},
+      {q:'ข้อใด ไม่ถูกต้อง เมื่อกล่าวถึงพืชประเภทอิงอาศัยที่เรียกกันทั่วไปว่า "ชายผ้าสีดา"', choices:[
+        "เป็นพืชที่สืบพันธุ์โดยสปอร์",
+        "เป็นพืชที่มีท่อลำเลียงน้ำ และท่อลำเลียงอาหาร",
+        "เป็นพืชกลุ่มเดียวกับข้าหลวงหลังลาย",
+        "เป็นพืชกลุ่มเดียวกับมอส ลิเวอร์เวิร์ต"], answer:3},
+      {q:"ข้อใดจัดเป็นสิ่งมีชีวิตที่อยู่ในกลุ่มเดียวกัน ตามระบบการแบ่งหมวดหมู่สิ่งมีชีวิต", choices:[
+        "หอย ปลาหมึก",
+        "ฟองน้ำ ดอกไม้ทะเล",
+        "พยาธิใบไม้ในตับ พยาธิใส้เดือน",
+        "ปะการัง แมงกะพรุน"], answer:3},
+      {q:"ปลาชนิดใดจัดเป็นปลากระดูกอ่อน", choices:["ปลาการ์ตูน","ปลาเนื้ออ่อน","ปลากระเบน","ปลาดุกเนื้ออ่อน"], answer:2},
+      {q:"สัตว์ชนิดใดที่เลี้ยงลูกด้วยน้ำนมและออกลูกเป็นไข่", choices:["นากทะเล","ตุ่นปากเป็ด","โคอาลา","จิงโจ้"], answer:0},
+      {q:"ข้อใดเป็นการใช้ประโยชน์จากความหลากหลายทางชีวภาพได้อย่างพอประมาณ", choices:[
+        "สมศรีเก็บเห็ดจากป่ามาประกอบอาหาร",
+        "สมชายตัดไม้มะค่ามาทำเฟอร์นิเจอร์ขาย",
+        "สมพรเก็บกล้วยไม้ป่ามาขายหารายได้",
+        "สมพงษ์เข้าไปตั้งแคมป์เล่นดนตรีในเขตอุทยาน"], answer:0},
+      {q:"ข้อใดเป็นการรักษาความหลากหลายทางชีวภาพของชนิดสิ่งมีชีวิต", choices:[
+        "การปลูกพืช GMOs",
+        "การนำกบป่ามาเลี้ยงเป็นสัตว์เลี้ยง",
+        "การปลูกพืชเศรษฐกิจเชิงเดี่ยว",
+        "การจัดให้มีสวนป่าชุมชน"], answer:3}
+    ]
+  },
+  {
+    id: 2,
+    name: "บทที่ 2",
+    topic: "สารชีวโมเลกุล",
+    questions: [
+      {q:"ข้อใด ไม่จัดเป็น สารชีวโมเลกุล", choices:["ไขมัน","โปรตีน","ไบยูเร็ต","คาร์โบไฮเดรต"], answer:2},
+      {q:"น้ำตาลข้อใดจัดเป็นสารโมเลกุลเล็กของคาร์โบไฮเดรต", choices:["กลูโคส","มอลโทส","แลกโทส","ไกลโคเจน"], answer:0},
+      {q:"จากผลการทดลองสาร A ไม่เปลี่ยนสีกับไอโอดีนแต่ให้ตะกอนสีแดงอิฐกับเบเนดิกต์ ส่วนสาร B เปลี่ยนเป็นสีน้ำเงินเข้มกับไอโอดีนแต่ไม่เปลี่ยนแปลงกับเบเนดิกต์ สาร A และ B น่าจะเป็นสารใดตามลำดับ", choices:[
+        "กลูโคส และน้ำตาลทราย","น้ำตาลทราย และกลูโคส","แป้ง และน้ำตาลกลูโคส","น้ำตาลกลูโคส และแป้ง"], answer:3},
+      {q:"ไขมัน ประกอบด้วยธาตุหลักตามข้อใด", choices:["C H O","C H O N","C H O P","C H O N P"], answer:0},
+      {q:"ไขมันและน้ำมันได้จากการรวมตัวทางเคมีของสารใด", choices:[
+        "กรดไขมันและกลีเซอรอลอย่างละ 1 โมเลกุล",
+        "กรดไขมันและกลีเซอรอลอย่างละ 3 โมเลกุล",
+        "กรดไขมัน 1 โมเลกุล กับกลีเซอรอล 3 โมเลกุล",
+        "กรดไขมัน 3 โมเลกุล กับกลีเซอรอล 1 โมเลกุล"], answer:3},
+      {q:"ข้อใด กล่าวถูกต้อง เกี่ยวกับไขมันไม่อิ่มตัว", choices:[
+        "เป็นสาเหตุของโรคความดันโลหิตสูง",
+        "กรดไขมันที่อะตอมคาร์บอนยึดกันด้วยพันธะเดี่ยว",
+        "ร่างกายไม่สามารถสังเคราะห์ได้",
+        "คอเลสเตอรอลจัดเป็นไขมันไม่อิ่มตัว"], answer:0},
+      {q:"โอเมกา-3 เป็นไขมันที่พบได้จากอาหารใด", choices:["น้ำมันหมู","น้ำมันปลา","น้ำมันปาล์ม","น้ำมันกัญชา"], answer:1},
+      {q:"หน่วยย่อยที่สุดของโปรตีนคืออะไร", choices:["กรดอะมิโน","กรดไขมันอิ่มตัว","กรดไขมันไม่อิ่มตัว","คอลลาเจน"], answer:0},
+      {q:"ข้อใดเป็นกรดอะมิโนที่จำเป็น", choices:["ไลซีน ลิวซีน","ไทโรซีน ไลซีน","กลูตามิก ไกลซีน","วาลีน ไทโรซีน"], answer:0},
+      {q:"พิษงู จัดเป็นสารประเภทใด", choices:["ไขมัน","โปรตีน","คาร์โบไฮเดรต","กรดอะมิโน"], answer:1},
+      {q:"ข้อใด กล่าวถูกต้อง เกี่ยวกับโปรตีน", choices:[
+        "โปรตีนที่เป็นสายใยจะละลายน้ำได้ดีกว่าโปรตีนรูปร่างกลม",
+        "โปรตีนสมบูรณ์เป็นโปรตีนที่มีกรดอะมิโนที่จำเป็นครบทุกชนิด",
+        "โปรตีนจากถั่วเหลืองจัดเป็นโปรตีนไม่สมบูรณ์",
+        "โปรตีน 1 กรัม ให้พลังงาน 10 กิโลแคลอรี"], answer:1},
+      {q:"กรดนิวคลีอิกประกอบด้วยหน่วยย่อย 3 ชนิด ตามข้อใด", choices:[
+        "กรดอะมิโน กลูโคส และฟรักโทส",
+        "กรดอะมิโน กลูโคส และไกลโคเจน",
+        "น้ำตาลไรโบส หมู่ฟอสเฟต และไนโตรจีนัสเบส",
+        "น้ำตาลไรโบส หมู่ฟอสเฟต และแมนโนส"], answer:2},
+      {q:"หน่วยย่อยของกรดนิวคลีอิกคือข้อใด", choices:["นิวคลีโอไทด์","กรดอะมิโน","กรดไขมัน","กลีเซอรอล"], answer:0},
+      {q:"การจับคู่ของเบสในสารพันธุกรรม ข้อใดถูกต้อง", choices:["G กับ C","C กับ T","A กับ C","C กับ U"], answer:0},
+      {q:"อาร์เอ็นเอที่มีหน้าที่ถอดรหัสพันธุกรรมจาก DNA เพื่อนำส่งข้อมูลในการสังเคราะห์โปรตีน คือข้อใด", choices:["tRNA","mRNA","rRNA","oRNA"], answer:1}
+    ]
+  },
+  {
+    id: 3,
+    name: "บทที่ 3",
+    topic: "จุลินทรีย์ในอาหาร",
+    questions: [
+      {q:"แบคทีเรียในข้อใดจัดเป็นแบคทีเรียประเภท Bacillus", choices:["แบคทีเรียรูปแท่ง","แบคทีเรียรูปกลม","แบคทีเรียรูปเกลียว","แบคทีเรียรูปไข่"], answer:0},
+      {q:"ข้อใดเป็นรูปร่างลักษณะของยีสต์", choices:[
+        "เซลล์รูปกลมเรียงเป็นกลุ่มคล้ายพวงองุ่น (แบบแบคทีเรีย)",
+        "เซลล์รูปแท่งเดี่ยว ๆ (แบบแบคทีเรีย)",
+        "เส้นใยสานกันเป็นร่างแห (แบบเชื้อรา)",
+        "เซลล์รูปไข่/รี ขนาดใหญ่กว่าแบคทีเรีย มักเห็นการแตกหน่อ"], answer:3},
+      {q:"ข้อใดกล่าวถึงแบคทีเรีย ไม่ถูกต้อง", choices:[
+        "อยู่ในอาณาจักรมอเนอรา",
+        "เซลล์มีเยื่อหุ้มนิวเคลียส",
+        "มีทั้งรูปร่างกลม รูปร่างท่อน และรูปเกลียว",
+        "เป็นสิ่งมีชีวิตเซลล์เดียว"], answer:1},
+      {q:"กลุ่มของเส้นใยรา เรียกว่าอะไร", choices:["ไฮฟา","ไมซีเลียม","สปอร์","ดอกเห็ด"], answer:1},
+      {q:"อุตสาหกรรมใดที่ใช้ประโยชน์จากยีสต์", choices:["ผักดอง","ไวน์","เต้าหู้ยี้","วุ้นมะพร้าว"], answer:1},
+      {q:"ผลิตภัณฑ์อาหารใดที่ต้องใช้ประโยชน์จากแบคทีเรียที่สร้างกรดแลกติก", choices:["นมเปรี้ยว","น้ำส้มสายชู","เทมเป้","วุ้นมะพร้าว"], answer:0},
+      {q:"ปฏิกิริยาเคมี C6H12O6 → 2C2H5OH + 2CO2 ที่เกิดขึ้นในกระบวนการผลิตอาหาร เกี่ยวข้องกับจุลินทรีย์ชนิดใด", choices:["แบคทีเรีย","รา","ไซยาโนแบคทีเรีย","ยีสต์"], answer:3},
+      {q:"จุลินทรีย์ต่อไปนี้เจริญเติบโตได้ดีในสภาพแวดล้อมที่เป็นกรด ยกเว้น จุลินทรีย์ในข้อใด", choices:["Lactobacillus sp.","Salmonella sp.","Streptococcus sp.","Lactococcus sp."], answer:1},
+      {q:"ค่า aw เกี่ยวข้องกับปัจจัยด้านใดที่ส่งผลต่อการเจริญเติบโตของจุลินทรีย์", choices:["อุณหภูมิ","ออกซิเจน","ความชื้น","องค์ประกอบของอาหาร"], answer:2},
+      {q:"สารในอบเชยที่สามารถยับยั้งการเจริญเติบโตของจุลินทรีย์ คือสารใด", choices:["eugenol","allicin","thymol","cinnamic aldehyde"], answer:3},
+      {q:"ข้อใดกล่าวถึงแบคทีเรียพวก Psychrophiles ได้ถูกต้อง", choices:[
+        "แบคทีเรียที่ไม่ใช้ออกซิเจนในการเจริญเติบโต",
+        "แบคทีเรียที่เจริญเติบโตได้ดีในช่วงอุณหภูมิต่ำ",
+        "แบคทีเรียที่เจริญเติบโตได้ดีในช่วงอุณหภูมิสูง",
+        "แบคทีเรียที่เจริญเติบโตได้ดีในสภาวะที่เป็นกรด"], answer:1},
+      {q:"การทำปลาส้ม แหนม ต้องอาศัยการทำงานของจุลินทรีย์ในข้อใด", choices:["ยีสต์","Lactobacillus sp.","Acetobactor sp.","Gluconobacter sp."], answer:1},
+      {q:"อาหารเป็นพิษที่เกิดจากการปนเปื้อนของเชื้อแบคทีเรียในเครื่องในสัตว์ หรือเนื้อ นม ไข่ ส่วนใหญ่มาจากแบคทีเรียชนิดใด", choices:["Bacillus cereus","Salmonella","Staphylococcus","Acetobacter"], answer:1},
+      {q:"โรคอาหารเป็นพิษที่เรียกว่า Chinese Restaurant Syndrome เกิดจากจุลินทรีย์ชนิดใด", choices:["Bacillus cereus","Salmonella","Staphylococcus","Acetobacter"], answer:0},
+      {q:"สัญลักษณ์ที่เรียกว่า Radula เกี่ยวข้องกับอาหารชนิดใด", choices:[
+        "อาหารที่ผ่านการฆ่าเชื้อโดยใช้ความดัน",
+        "อาหารสำเร็จรูปที่ผ่านการพาสเจอร์ไรซ์",
+        "อาหารสำเร็จรูปที่ผ่านการสเตอริไลส์",
+        "อาหารที่ผ่านการฉายรังสี"], answer:3}
+    ]
+  },
+  {
+    id: 5,
+    name: "บทที่ 5",
+    topic: "ปิโตรเลียมและผลิตภัณฑ์",
+    questions: [
+      {q:"ข้อใดหมายถึงปิโตรเลียม", choices:[
+        "น้ำมันที่ได้จากหิน",
+        "มีทั้งที่เป็นสถานะของเหลวคือน้ำมันดิบ และสถานะแก๊สธรรมชาติ",
+        "องค์ประกอบส่วนใหญ่เป็นสารประกอบไฮโดรคาร์บอน",
+        "ถูกทุกข้อ"], answer:3},
+      {q:'ข้อใดเรียงลำดับขั้นตอนการเกิดปิโตรเลียมได้ถูกต้อง (1) ความดันและความร้อนใต้เปลือกโลกที่สูงมาก อินทรียสารถูกแปรสภาพกลายเป็น "เคโรเจน" (2) อินทรียสารจากการย่อยสลายซากพืชซากสัตว์ใต้ทะเลลึกทับถมกันเป็นชั้นตะกอนหนาแน่น (3) น้ำมันดิบและแก๊สเคลื่อนย้ายผ่านหินรูพรุนสู่แอ่งหินที่ปิดกั้นปิโตรเลียม (4) หินที่มีเคโรเจนสะสมมากได้รับความร้อนและความกดดันจนแปรสภาพเป็นน้ำมันดิบและแก๊ส', choices:[
+        "1 → 2 → 4 → 3","2 → 1 → 4 → 3","2 → 3 → 4 → 1","1 → 4 → 2 → 3"], answer:1},
+      {q:"ข้อใดเป็นขั้นตอนแรกของการสำรวจปิโตรเลียม", choices:[
+        "การเก็บตัวอย่างดิน","การสำรวจทางธรณีฟิสิกส์","การเจาะสำรวจ","การสำรวจโดยใช้ดาวเทียม"], answer:0},
+      {q:"ข้อใด ไม่ได้เป็น ขั้นตอนสำรวจทางธรณีฟิสิกส์", choices:[
+        "การวิเคราะห์หินตัวอย่าง",
+        "วิธีตรวจวัดค่าแรงดึงดูดของโลก",
+        "การตรวจวัดคลื่นไหวสะเทือน",
+        "การตรวจวัดค่าสนามแม่เหล็ก"], answer:0},
+      {q:"แหล่งปิโตรเลียมที่พบในทะเลอ่าวไทย ส่วนใหญ่จะเป็นแหล่งผลิตแบบใด", choices:[
+        "แหล่งผลิตแก๊สธรรมชาติ และแก๊สธรรมชาติเหลว",
+        "แหล่งผลิตแก๊สธรรมชาติ",
+        "แหล่งผลิตแก๊สธรรมชาติเหลว",
+        "แหล่งผลิตน้ำมันดิบ"], answer:0},
+      {q:"แหล่งปิโตรเลียมของโลกส่วนมากพบอยู่ในกลุ่มประเทศใด", choices:[
+        "กลุ่มประเทศแถบตะวันออกกลางและกลุ่มประเทศแถบทะเลเมดิเตอร์เรเนียน",
+        "กลุ่มประเทศแถบทะเลแดง และกลุ่มประเทศแถบตะวันออกกลาง",
+        "กลุ่มประเทศแถบทะเลอันดามันและกลุ่มประเทศแถบตะวันออกกลาง",
+        "กลุ่มประเทศแถบตะวันออกกลางและกลุ่มประเทศแถบทะเลแคริบเบียน"], answer:0},
+      {q:"น้ำมันดิบประกอบด้วยสารประกอบไฮโดรคาร์บอนหลายชนิดและมีจุดเดือดแตกต่างกัน การแยกสารต่าง ๆ ออกจากน้ำมันดิบใช้วิธีการใด", choices:[
+        "การกลั่นแยกลำดับส่วน","การกลั่นแบบธรรมดา","การสกัดสารด้วยไอน้ำร่วมกับการสกัดเย็น","การสกัดสารด้วยตัวทำละลายร่วมกับการกลั่น"], answer:0},
+      {q:"แก๊สแอลพีจีเป็นแก๊สที่ได้จากการผสมของแก๊สชนิดใด", choices:["CH4 + C2H6","C3H8 + C4H10","C2H2 + C3H8","CH4 + C3H8"], answer:1},
+      {q:"น้ำมันเตานำไปใช้ประโยชน์ในด้านใด", choices:[
+        "เชื้อเพลิงในโรงไฟฟ้า สารตั้งต้นในการผลิตเม็ดพลาสติก",
+        "เชื้อเพลิงในโรงไฟฟ้า และเรือเดินสมุทร",
+        "ทำผิวหน้าถนน และสารหล่อลื่นในเครื่องยนต์",
+        "เชื้อเพลิงในรถยนต์ และสารตั้งต้นในอุตสาหกรรมปิโตรเคมี"], answer:3},
+      {q:"น้ำมันที่ใช้ในเครื่องบินไอพ่น เป็นน้ำมันในกลุ่มใด", choices:[
+        "น้ำมันเบนซิน ผสม น้ำมันดีเซล","น้ำมันก๊าด ผสม น้ำมันดีเซล","น้ำมันดีเซล","น้ำมันเบนซิน"], answer:0}
+    ]
+  }
+];
+
+/* ================= state ================= */
+let quizPool = [];      // [{chapterId, chapterName, q, choices, answer}]
+let userAnswers = [];   // parallel array, index or null
+let currentFilter = "all";
+let lastSelectedChapterIds = [];
+
+const THAI_LETTERS = ["ก","ข","ค","ง"];
+
+/* ================= init: render chapter selector ================= */
+function renderChapterList(){
+  const list = document.getElementById("chapter-list");
+  list.innerHTML = "";
+  CHAPTERS.forEach(ch=>{
+    const div = document.createElement("label");
+    div.className = "chapter-option";
+    div.innerHTML = `
+      <input type="checkbox" value="${ch.id}" onchange="onChapterToggle(this)">
+      <div class="info">
+        <b>${ch.name}: ${ch.topic}</b>
+        <span>${ch.questions.length} ข้อ</span>
+      </div>`;
+    list.appendChild(div);
+  });
+}
+function onChapterToggle(el){
+  el.closest(".chapter-option").classList.toggle("checked", el.checked);
+  document.getElementById("select-warn").textContent = "";
+}
+function selectAll(state){
+  document.querySelectorAll("#chapter-list input[type=checkbox]").forEach(cb=>{
+    cb.checked = state;
+    cb.closest(".chapter-option").classList.toggle("checked", state);
+  });
+}
+
+/* ================= start quiz ================= */
+function startQuiz(){
+  const checked = Array.from(document.querySelectorAll("#chapter-list input:checked")).map(cb=>parseInt(cb.value));
+  if(checked.length === 0){
+    document.getElementById("select-warn").textContent = "กรุณาเลือกอย่างน้อย 1 บท ก่อนเริ่มทำแบบทดสอบ";
+    return;
+  }
+  lastSelectedChapterIds = checked;
+  buildPool(checked);
+  renderQuiz();
+  showScreen("screen-quiz");
+}
+
+function buildPool(chapterIds){
+  quizPool = [];
+  chapterIds.forEach(id=>{
+    const ch = CHAPTERS.find(c=>c.id===id);
+    ch.questions.forEach(qu=>{
+      quizPool.push({
+        chapterLabel: ch.name,
+        q: qu.q,
+        choices: qu.choices,
+        answer: qu.answer
+      });
+    });
+  });
+  userAnswers = new Array(quizPool.length).fill(null);
+}
+
+function renderQuiz(){
+  const names = lastSelectedChapterIds.map(id=>CHAPTERS.find(c=>c.id===id).name).join(", ");
+  document.getElementById("quiz-title-label").textContent = "ทดสอบ: " + names;
+  updateAnsweredCount();
+
+  const container = document.getElementById("quiz-questions");
+  container.innerHTML = "";
+  quizPool.forEach((item, idx)=>{
+    const block = document.createElement("div");
+    block.className = "q-block";
+    let choicesHtml = "";
+    item.choices.forEach((c, ci)=>{
+      choicesHtml += `
+        <div class="choice" id="choice-${idx}-${ci}" onclick="selectAnswer(${idx}, ${ci})">
+          <input type="radio" name="q${idx}" id="radio-${idx}-${ci}" onclick="selectAnswer(${idx}, ${ci})">
+          <label for="radio-${idx}-${ci}">${THAI_LETTERS[ci]}. ${c}</label>
+        </div>`;
+    });
+    block.innerHTML = `
+      <span class="q-tag">${item.chapterLabel} • ข้อ ${idx+1}</span>
+      <p class="q-text">${idx+1}. ${item.q}</p>
+      ${choicesHtml}`;
+    container.appendChild(block);
+  });
+}
+
+function selectAnswer(qIdx, choiceIdx){
+  userAnswers[qIdx] = choiceIdx;
+  for(let i=0;i<4;i++){
+    const el = document.getElementById(`choice-${qIdx}-${i}`);
+    if(el) el.classList.toggle("selected", i===choiceIdx);
+  }
+  const radio = document.getElementById(`radio-${qIdx}-${choiceIdx}`);
+  if(radio) radio.checked = true;
+  updateAnsweredCount();
+}
+
+function updateAnsweredCount(){
+  const answered = userAnswers.filter(a=>a!==null).length;
+  document.getElementById("answered-count").textContent = `ตอบแล้ว ${answered}/${quizPool.length}`;
+  const pct = quizPool.length ? (answered/quizPool.length*100) : 0;
+  document.getElementById("progress-fill").style.width = pct + "%";
+}
+
+/* ================= submit & score ================= */
+function submitQuiz(){
+  const unanswered = userAnswers.filter(a=>a===null).length;
+  if(unanswered > 0){
+    document.getElementById("submit-warn").textContent = `ยังเหลือ ${unanswered} ข้อที่ยังไม่ได้ตอบ กรุณาตอบให้ครบก่อนส่งคำตอบ`;
+    return;
+  }
+  document.getElementById("submit-warn").textContent = "";
+  showResult();
+}
+
+function showResult(){
+  let correctCount = 0;
+  quizPool.forEach((item, idx)=>{
+    if(userAnswers[idx] === item.answer) correctCount++;
+  });
+  const total = quizPool.length;
+  document.getElementById("score-number").textContent = `${correctCount}/${total}`;
+
+  const pct = total ? (correctCount/total*100) : 0;
+  let msg;
+  if(pct === 100) msg = "ยอดเยี่ยมมาก! ตอบถูกทุกข้อ 🎉";
+  else if(pct >= 80) msg = "เก่งมาก! ทำได้ดีเยี่ยม";
+  else if(pct >= 60) msg = "ทำได้ดี ลองทบทวนข้อที่ผิดอีกนิด";
+  else msg = "ควรกลับไปทบทวนเนื้อหาเพิ่มเติมนะ สู้ ๆ!";
+  document.getElementById("score-msg").textContent = msg;
+
+  currentFilter = "all";
+  document.querySelectorAll(".filter-tab").forEach(t=>t.classList.toggle("active", t.dataset.f==="all"));
+  renderReview();
+  showScreen("screen-result");
+}
+
+function setFilter(f){
+  currentFilter = f;
+  document.querySelectorAll(".filter-tab").forEach(t=>t.classList.toggle("active", t.dataset.f===f));
+  renderReview();
+}
+
+function renderReview(){
+  const list = document.getElementById("review-list");
+  const emptyNote = document.getElementById("review-empty");
+  list.innerHTML = "";
+  let shown = 0;
+
+  quizPool.forEach((item, idx)=>{
+    const userIdx = userAnswers[idx];
+    const isCorrect = userIdx === item.answer;
+    if(currentFilter === "wrong" && isCorrect) return;
+    if(currentFilter === "correct" && !isCorrect) return;
+    shown++;
+
+    const div = document.createElement("div");
+    div.className = "review-item " + (isCorrect ? "correct" : "wrong");
+    const userText = item.choices[userIdx];
+    const correctText = item.choices[item.answer];
+    div.innerHTML = `
+      <div class="review-head">
+        <span class="badge ${isCorrect?'ok':'no'}">${isCorrect?'✓':'✕'}</span>
+        <span>${item.chapterLabel} • ข้อ ${idx+1}</span>
+      </div>
+      <p class="review-q">${item.q}</p>
+      <p class="review-line">คำตอบของคุณ: <b class="your-ans ${isCorrect?'ok-text':'wrong-text'}">${THAI_LETTERS[userIdx]}. ${userText}</b></p>
+      ${isCorrect ? "" : `<p class="review-line">คำตอบที่ถูกต้อง: <b class="correct-ans">${THAI_LETTERS[item.answer]}. ${correctText}</b></p>`}
+    `;
+    list.appendChild(div);
+  });
+
+  emptyNote.style.display = shown === 0 ? "block" : "none";
+}
+
+/* ================= navigation ================= */
+function retrySameChapters(){
+  buildPool(lastSelectedChapterIds);
+  renderQuiz();
+  document.getElementById("submit-warn").textContent = "";
+  showScreen("screen-quiz");
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+function backToSelect(){
+  showScreen("screen-select");
+  document.getElementById("select-warn").textContent = "";
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+/* ================= boot ================= */
+renderChapterList();
+</script>
+</body>
+</html>
